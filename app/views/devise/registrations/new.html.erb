@@ -1,0 +1,39 @@
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card shadow-lg p-4 text-dark bg-white w-100" style="max-width: 400px; z-index: 20;">
+    <h2 class="text-center mb-4">Sign Up</h2>
+
+    <%= form_with(model: resource, url: registration_path(resource_name), local: true) do |f| %>
+      <div class="mb-3">
+        <%= f.label :username, class: "form-label" %>
+        <%= f.text_field :username, autofocus: true, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :email, class: "form-label" %>
+        <%= f.email_field :email, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :password, class: "form-label" %>
+        <%= f.password_field :password, class: "form-control", autocomplete: "new-password" %>
+        <% if @minimum_password_length %>
+          <small class="text-muted">(<%= @minimum_password_length %> characters minimum)</small>
+        <% end %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :password_confirmation, class: "form-label" %>
+        <%= f.password_field :password_confirmation, class: "form-control", autocomplete: "new-password" %>
+      </div>
+
+      <div class="d-grid">
+        <%= f.submit "Sign Up", class: "btn btn-success" %>
+      </div>
+    <% end %>
+
+    <div class="text-center mt-3">
+      <%= link_to "Log in", new_session_path(resource_name), class: "btn btn-link text-dark" %>
+      <%= link_to "Forgot your password?", new_password_path(resource_name), class: "d-block mt-2 text-dark" %>
+    </div>
+  </div>
+</div>

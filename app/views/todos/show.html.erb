@@ -1,0 +1,31 @@
+<h1>Todo Details</h1>
+
+<p>
+  <strong>Title:</strong>
+  <%= @todo.title %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @todo.description %>
+</p>
+
+<p>
+  <strong>Due Date:</strong>
+  <%= @todo.due_date %>
+</p>
+
+<p>
+  <strong>Completed:</strong>
+  <%= @todo.completed ? "Yes" : "No" %>
+</p>
+
+<div class="actions">
+  <%= link_to "Edit", edit_todo_path(@todo), class: "btn btn-warning" %>
+  <%= link_to "Back", todos_path, class: "btn btn-secondary" %>
+
+  <% if current_user.admin? %>
+    <%= link_to "Delete Todo", todo_path(@todo), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %>
+  <% end %>
+</div>
+

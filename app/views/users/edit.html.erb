@@ -1,0 +1,22 @@
+<h1>Edit User</h1>
+
+<%= form_with(model: @user, local: true) do |f| %>
+  <div class="mb-3">
+    <%= f.label :username %>
+    <%= f.text_field :username, class: "form-control", required: true %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :email %>
+    <%= f.email_field :email, class: "form-control", required: true %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :role %>
+    <%= f.select :role, options_for_select([["User", "user"], ["Admin", "admin"]], @user.role), {}, class: "form-select" %>
+  </div>
+
+  <%= f.submit "Update User", class: "btn btn-primary" %>
+  <%= link_to "Back", users_path, class: "btn btn-secondary ms-2" %>
+<% end %>
+

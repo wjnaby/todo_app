@@ -1,0 +1,41 @@
+<div class="container my-5 d-flex flex-column align-items-center">
+  <h1 class="text-center mb-4">🗒️ My Memos</h1>
+
+  <div class="d-flex justify-content-end w-100 mb-3">
+    <%= link_to "New Memo", new_memo_path, class: "btn btn-primary" %>
+  </div>
+
+  <% colors = ["#FFFAE3", "#E3FFFA", "#FAE3FF", "#E3FAFF", "#FFF3E3", "#F3FFE3"] %>
+
+  <% if @memos.any? %>
+    <div class="row w-100 g-3">
+      <% @memos.each_with_index do |memo, index| %>
+        <div class="col-md-6 col-lg-4">
+          <div class="card p-3 shadow" style="background-color: <%= colors[index % colors.size] %>;">
+            <h5 class="fw-bold mb-2"><%= memo.title.presence || "Untitled Memo" %></h5>
+            <p style="white-space: pre-wrap;"><%= memo.content %></p>
+            <small class="text-muted d-block mb-2">Created: <%= memo.created_at.strftime("%d %b %Y %H:%M") %></small>
+            
+            <div class="d-flex justify-content-between">
+              <%= link_to memo_path(memo), class: "btn btn-outline-info btn-sm" do %>
+                <i class="bi bi-eye"></i>
+              <% end %>
+
+              <%= link_to edit_memo_path(memo), class: "btn btn-outline-warning btn-sm" do %>
+                <i class="bi bi-pencil"></i>
+              <% end %>
+
+              <%= link_to memo_path(memo),
+                  data: { turbo_method: :delete, turbo_confirm: "Are you sure?" },
+                  class: "btn btn-outline-danger btn-sm" do %>
+                <i class="bi bi-trash"></i>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-center mt-4 text-white">No memos yet. Click "New Memo" to create one!</p>
+  <% end %>
+</div>

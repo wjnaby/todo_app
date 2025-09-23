@@ -1,0 +1,34 @@
+<!-- Centered Login Form -->
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card shadow-lg p-4 text-dark bg-white w-100" style="max-width: 400px;">
+    <h2 class="text-center mb-4">Log In</h2>
+
+    <%= form_with(scope: :user, url: session_path(:user), local: true) do |f| %>
+      <div class="mb-3">
+        <%= f.label :username, class: "form-label" %>
+        <%= f.text_field :username, autofocus: true, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :password, class: "form-label" %>
+        <%= f.password_field :password, class: "form-control", autocomplete: "current-password" %>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <div class="form-check mb-3">
+          <%= f.check_box :remember_me, class: "form-check-input" %>
+          <%= f.label :remember_me, class: "form-check-label" %>
+        </div>
+      <% end %>
+
+      <div class="d-grid">
+        <%= f.submit "Log In", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+
+    <div class="text-center mt-3">
+      <%= link_to "Sign up", new_registration_path(:user), class: "btn btn-link text-dark" %>
+      <%= link_to "Forgot your password?", new_password_path(:user), class: "d-block mt-2 text-dark" %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+<div class="d-flex justify-content-center align-items-start" style="min-height: 100vh; background: radial-gradient(ellipse at center, #0d1d31 0%, #0c0d13 100%); padding-top: 100px;">
+  <div class="card shadow-lg text-white p-4" style="max-width: 500px; width: 100%; background: rgba(0,0,0,0.5); border-radius: 20px; border: none; margin: auto;">
+    <div class="card-body">
+      <h3 class="card-title mb-4 text-center">✏️ Edit Profile</h3>
+
+      <%= form_with model: @user, url: profile_path, local: true, html: { multipart: true } do |f| %>
+        
+        <!-- Avatar Upload -->
+        <div class="mb-4 text-center">
+          <% if @user.avatar.attached? %>
+            <%= image_tag @user.avatar.variant(resize_to_limit: [100, 100]),
+                  class: "img-fluid rounded-circle border border-light mb-3 shadow-sm" %>
+          <% else %>
+            <div class="rounded-circle bg-secondary d-inline-block mb-3" style="width: 100px; height: 100px;"></div>
+          <% end %>
+          <div>
+            <%= f.file_field :avatar, class: "form-control form-control-sm w-50 mx-auto" %>
+          </div>
+        </div>
+
+        <!-- Name & Username -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <%= f.label :name, class: "form-label" %>
+            <%= f.text_field :name, class: "form-control rounded" %>
+          </div>
+          <div class="col-md-6">
+            <%= f.label :username, class: "form-label" %>
+            <%= f.text_field :username, class: "form-control rounded" %>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="mb-4">
+          <%= f.label :preferences, class: "form-label" %>
+          <%= f.text_area :preferences, rows: 3, class: "form-control rounded" %>
+        </div>
+
+        <hr class="border-light">
+
+        <h5 class="mb-3 text-center">🔑 Change Password</h5>
+
+        <!-- Password Fields -->
+        <div class="mb-3">
+          <%= f.label :current_password, "Current Password", class: "form-label" %>
+          <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control rounded" %>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <%= f.label :password, "New Password", class: "form-label" %>
+            <%= f.password_field :password, autocomplete: "new-password", class: "form-control rounded" %>
+          </div>
+          <div class="col-md-6">
+            <%= f.label :password_confirmation, "Confirm New Password", class: "form-label" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control rounded" %>
+          </div>
+        </div>
+
+        <%= f.submit "Save Changes", class: "btn btn-primary w-100 rounded-pill" %>
+      <% end %>
+    </div>
+  </div>
+</div>

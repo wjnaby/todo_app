@@ -1,0 +1,107 @@
+<div id="calendar-container" class="text-center">
+  <h1 class="text-white mb-4">📅 Task Calendar</h1>
+  <div id="calendar"></div>
+</div>
+
+<script>
+  document.addEventListener("turbo:load", () => {
+    const calendarEl = document.getElementById("calendar");
+    if (!calendarEl) return;
+
+    const events = <%= raw @tasks.map { |t| {
+      title: t.title,
+      start: t.due_date,
+      status: if t.completed
+                'completed'
+              elsif t.due_date.present? && t.due_date < Date.today
+                'overdue'
+              elsif t.due_date.present?
+                'pending'
+              else
+                'no-due-date'
+              end,
+      extendedProps: { url: task_path(t) } 
+    } }.to_json %>;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: "dayGridMonth",
+      height: 600, // smaller height
+      events: events,
+      headerToolbar: {
+        left: "prev,next today",
+        center: "title",
+        right: ""
+      },
+      themeSystem: "bootstrap5",
+      displayEventTime: false,
+      eventContent: arg => ({
+        html: `<div class="event-pill ${arg.event.extendedProps.status || 'pending'}">${arg.event.title}</div>`
+      }),
+      eventClick: function(info) {
+        info.jsEvent.preventDefault();
+        if (info.event.extendedProps.url) {
+          window.location.href = info.event.extendedProps.url;
+        }
+      }
+    });
+
+    calendar.render();
+  });
+</script>
+
+<style>
+  /* Calendar container including title */
+  #calendar-container {
+    max-width: 800px; /* smaller than before */
+    margin: 100px auto 30px; /* slightly less top margin */
+    padding: 15px; /* smaller padding */
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  #calendar-container h1 {
+    margin-top: 0;
+    font-size: 1.8rem; /* slightly smaller title */
+    color: white;
+  }
+
+  #calendar {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px; /* smaller padding */
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem; /* slightly smaller text */
+  }
+
+  /* FullCalendar styling */
+  .fc-daygrid-day-number,
+  .fc-toolbar-title {
+    color: white !important;
+  }
+
+  .fc-col-header-cell-cushion {
+    color: transparent !important;
+  }
+
+  /* Event pills */
+  .event-pill {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 6px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    cursor: pointer; /* Indicate it's clickable */
+  }
+
+  .event-pill.completed   { background: #28a745; }
+  .event-pill.pending     { background: #ffc107; color: black; }
+  .event-pill.overdue     { background: #dc3545; }
+  .event-pill.no-due-date { background: #6c757d; }
+</style>

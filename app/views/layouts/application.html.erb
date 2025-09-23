@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Todo App" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- Bootstrap CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+        padding-top: 70px;
+        background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+        overflow-x: hidden;
+        font-family: Arial, sans-serif;
+        color: white;
+      }
+
+      /* Flash messages */
+      .alert {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1050;
+        width: auto;
+        max-width: 90%;
+        font-size: 1rem;
+        text-align: center;
+      }
+
+      .alert.motivational {
+        background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+        color: #000;
+        font-weight: bold;
+        font-size: 1.2rem;
+        border: 2px solid #fff;
+        box-shadow: 0 0 10px #fff;
+      }
+
+      .stars { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:0; }
+      .star {
+        position:absolute;
+        top:calc(var(--top)*100%);
+        left:calc(var(--left, var(--top))*100%);
+        width:var(--size); height:var(--size);
+        background:white; border-radius:50%;
+        opacity:0;
+        animation:twinkle var(--duration) linear infinite;
+        animation-delay:var(--delay);
+      }
+
+      @keyframes twinkle {
+        0%,100%{opacity:0; transform:translateY(0) translateX(0);}
+        50%{opacity:1; transform:translateY(-50px) translateX(50px);}
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Stars Background -->
+    <div class="stars">
+      <% 50.times do %>
+        <div class="star"></div>
+      <% end %>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark shadow fixed-top w-100 navbar-expand-lg">
+      <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand text-white" href="/">📝 Todo App</a>
+
+        <!-- Toggler/collapsing button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+          aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Collapsible content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <% if user_signed_in? %>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <%= link_to "Tasks", tasks_path, class: "nav-link #{current_page?(tasks_path) ? 'active' : ''}" %>
+              </li>
+              <li class="nav-item">
+                <%= link_to "Calendar", calendar_tasks_path, class: "nav-link #{current_page?(calendar_tasks_path) ? 'active' : ''}" %>
+              </li>
+              <li class="nav-item">
+                <%= link_to "Memos", memos_path, class: "nav-link #{current_page?(memos_path) ? 'active' : ''}" %>
+              </li>
+
+              <% if current_user.admin? %>
+                <li class="nav-item">
+                  <%= link_to "User Management", users_path, class: "nav-link #{current_page?(users_path) ? 'active' : ''}" %>
+                </li>
+              <% end %>
+
+              <!-- Dropdown for Profile & Logout -->
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                  Hello, <%= current_user.username %>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                  <li><%= link_to "Profile", profile_path, class: "dropdown-item #{current_page?(profile_path) ? 'active' : ''}" %></li>
+                  <li>
+                    <%= link_to "Log Out", destroy_user_session_path,
+                          data: { turbo_method: :delete, turbo_confirm: "Are you sure?" },
+                          class: "dropdown-item text-danger" %>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          <% else %>
+            <div class="d-flex ms-auto">
+              <%= link_to "Log In", new_user_session_path, class: "btn btn-outline-primary me-2" %>
+              <%= link_to "Sign Up", new_user_registration_path, class: "btn btn-outline-success" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container main-container mt-4">
+      <% flash.each do |key, value| %>
+        <% alert_class = case key.to_sym
+          when :notice then "alert-success"
+          when :alert then "alert-danger"
+          else "alert-info"
+        end %>
+
+        <% motivational = ["Great job! Small progress each day adds up to big results.",
+                          "You did it! Keep moving forward 💪",
+                          "One step closer to your goals 🎯",
+                          "Consistency is the key to success.",
+                          "Be proud of yourself — you’re growing every day 🌱"] %>
+
+        <div class="alert <%= alert_class %> <%= 'motivational' if motivational.any?{|q| value.include?(q)} %> alert-dismissible show shadow" role="alert">
+          <%= value %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <!-- Reinitialize Bootstrap Dropdowns on Turbo Load -->
+    <script>
+      document.addEventListener("turbo:load", function() {
+        var dropdownElements = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+        dropdownElements.map(function (dropdownToggleEl) {
+          return new bootstrap.Dropdown(dropdownToggleEl)
+        })
+      });
+
+      // Star animation
+      document.querySelectorAll('.star').forEach(star => {
+        star.style.setProperty('--top', Math.random());
+        star.style.setProperty('--left', Math.random());
+        star.style.setProperty('--size', 2 + Math.random() * 3 + 'px');
+        star.style.setProperty('--duration', (5 + Math.random() * 5) + 's');
+        star.style.setProperty('--delay', Math.random() * 5 + 's');
+      });
+
+      // Confetti for motivational quotes
+      document.addEventListener("DOMContentLoaded", () => {
+        const alerts = document.querySelectorAll(".alert-success");
+        const motivationalQuotes = [
+          "Great job! Small progress each day adds up to big results.",
+          "You did it! Keep moving forward 💪",
+          "One step closer to your goals 🎯",
+          "Consistency is the key to success.",
+          "Success is not final, failure is not fatal: It is the courage to continue that counts. 🌱"
+        ];
+
+        alerts.forEach(alert => {
+          if (motivationalQuotes.some(quote => alert.textContent.includes(quote))) {
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

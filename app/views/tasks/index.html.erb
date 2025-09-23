@@ -1,0 +1,141 @@
+<!-- Shooting Stars -->
+<div class="stars">
+  <% 50.times do %>
+    <div class="star"></div>
+  <% end %>
+</div>
+
+<!-- JS to randomize stars -->
+<script>
+  document.querySelectorAll('.star').forEach(star => {
+    star.style.setProperty('--top', Math.random());
+    star.style.setProperty('--size', Math.random() * 3 + 'px'); // slightly bigger
+    star.style.setProperty('--duration', (5 + Math.random() * 5) + 's');
+    star.style.setProperty('--delay', Math.random() * 5 + 's');
+  });
+</script>
+
+<!-- Main To-Do List Card -->
+<div class="container my-5 d-flex justify-content-center card-container">
+  <div class="card shadow-lg w-100 bg-dark text-white" style="max-width: 900px;">
+    <div class="card-body">
+
+      <!-- Page Title -->
+      <h1 class="text-center mb-4">📝 To Do List</h1>
+
+      <!-- Add Task Input + Button -->
+      <div class="d-flex justify-content-center mb-4 gap-2">
+        <%= form_with url: new_task_path, method: :get, local: true, class: "d-flex w-100 gap-2" do %>
+          <%= text_field_tag :title, nil, placeholder: "Enter task title...", class: "form-control" %>
+          <%= submit_tag "Add Task", class: "btn btn-primary" %>
+        <% end %>
+      </div>
+
+      <!-- Category Filter Buttons -->
+      <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+        <% ["All", "Work", "Personal", "Wishlist", "Urgent", "Daily"].each do |cat| %>
+          <%= link_to cat, (cat == "All" ? tasks_path : tasks_path(category: cat)), class: "btn btn-outline-light btn-sm" %>
+        <% end %>
+      </div>
+
+      <!-- Tasks Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center mb-0 text-white">
+          <thead class="table-secondary text-dark">
+            <tr>
+              <th>Task Description</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Due Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @tasks.each do |task| %>
+              <tr>
+                <!-- Task title -->
+                <td class="text-start">
+                  <% if task.completed %>
+                    <span class="text-decoration-line-through text-muted"><%= task.title %></span>
+                  <% else %>
+                    <%= task.title %>
+                  <% end %>
+                </td>
+
+                <!-- Category -->
+                <td>
+                  <span class="badge <%= task.category.present? ? 'bg-info' : 'bg-secondary' %>">
+                    <%= task.category.presence || "Uncategorized" %>
+                  </span>
+                </td>
+
+                <!-- Status -->
+                <td>
+                  <% if task.completed %>
+                    <span class="badge bg-success">✅ Completed</span>
+                  <% else %>
+                    <span class="badge bg-warning text-dark">⏳ Uncompleted</span>
+                  <% end %>
+                </td>
+
+                <!-- Created Date -->
+                <td><%= task.created_at.strftime("%d %b %Y") %></td>
+
+                <!-- Due Date -->
+                <td>
+                  <% if task.due_date.present? %>
+                    <% if !task.completed && task.due_date < Date.current %>
+                      <span class="text-danger fw-bold"><%= task.due_date.strftime("%d %b %Y") %> (Overdue)</span>
+                    <% else %>
+                      <%= task.due_date.strftime("%d %b %Y") %>
+                    <% end %>
+                  <% else %>
+                    <span class="badge bg-secondary">No due date</span>
+                  <% end %>
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <div class="d-flex justify-content-center gap-2">
+                    <!-- Toggle completed -->
+                    <%= form_with(model: task, local: true, class: "m-0") do |form| %>
+                      <%= form.check_box :completed, checked: task.completed, onchange: "this.form.submit();" %>
+                    <% end %>
+
+                    <!-- View task -->
+                    <%= link_to task_path(task), class: "btn btn-info btn-sm" do %>
+                      <i class="bi bi-eye"></i>
+                    <% end %>
+
+                    <!-- Delete task -->
+                    <% if task.persisted? %>
+                      <%= link_to task_path(task),
+                                  data: { turbo_method: :delete, turbo_confirm: "Are you sure?" },
+                                  class: "btn btn-danger btn-sm" do %>
+                        <i class="bi bi-trash"></i>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Stats -->
+      <p class="mt-4 text-center">
+        ✅ Completed: <span class="fw-bold text-success"><%= @tasks.where(completed: true).count %></span> |
+        ⏳ Uncompleted: <span class="fw-bold text-warning"><%= @tasks.where(completed: false).count %></span> |
+        🕒 No due date: <span class="fw-bold text-secondary"><%= @tasks.where(due_date: nil).count %></span>
+      </p>
+
+      <div class="d-flex justify-content-center mt-3 pagination-container">
+        <%= paginate @tasks %>
+      </div>
+
+
+    </div>
+  </div>
+</div>

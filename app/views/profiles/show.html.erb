@@ -1,0 +1,77 @@
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="card shadow-sm text-white" style="max-width: 650px; width: 100%; background: rgba(0,0,0,0.5); border: none;">
+    <div class="card-body text-center">
+      <h3 class="card-title mb-4">👤 My Profile</h3>
+
+      <!-- Avatar (only for normal users, not admin) -->
+      <% unless @user.admin? %>
+        <div class="mb-3">
+          <% if @user.avatar.attached? %>
+            <%= image_tag(
+                  @user.avatar.variant(resize_to_limit: [150, 150]).processed,
+                  class: "img-fluid rounded-circle border shadow-sm",
+                  alt: "User Avatar"
+                ) %>
+          <% else %>
+            <%= image_tag "default-avatar.png",
+                  class: "img-fluid rounded-circle border shadow-sm",
+                  alt: "Default Avatar" %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Profile Details -->
+      <div class="text-start px-4">
+        <p><strong>Name:</strong> <%= @user.name.presence || "Not set" %></p>
+        <p><strong>Username:</strong> <%= @user.username %></p>
+        <p><strong>Email:</strong> <%= @user.email %></p>
+        <p><strong>Preferences:</strong> <%= @user.preferences.presence || "No preferences set" %></p>
+
+        <!-- Role -->
+        <p><strong>Role:</strong>
+          <% if @user.admin? %>
+            <span class="badge bg-danger">Admin</span>
+          <% else %>
+            <span class="badge bg-primary">User</span>
+          <% end %>
+        </p>
+
+        <!-- Status -->
+        <p><strong>Status:</strong>
+          <% if @user.active? %>
+            <span class="badge bg-success">Active</span>
+          <% else %>
+            <span class="badge bg-secondary">Inactive</span>
+          <% end %>
+        </p>
+      </div>
+
+      <!-- Extra section only for Admin -->
+      <% if @user.admin? %>
+        <hr class="border-light">
+        <h5>🔧 Admin Controls</h5>
+        <p class="text-muted">You can manage users and tasks.</p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <%= link_to "User Management", users_path, class: "btn btn-outline-light" %>
+          <%= link_to "Manage Todos", todos_path, class: "btn btn-outline-light" %>
+        </div>
+      <% end %>
+
+      <!-- Edit Button -->
+      <%= link_to "Edit Profile", edit_profile_path, class: "btn btn-primary mt-4 px-4" %>
+    </div>
+  </div>
+
+  <!-- Initialize Bootstrap Navbar & Dropdowns -->
+  <script>
+    document.addEventListener("turbo:load", function() {
+      // Initialize all dropdowns
+      var dropdownElements = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+      dropdownElements.map(function(el) { return new bootstrap.Dropdown(el) })
+
+      // Initialize navbar togglers
+      var navbarToggles = [].slice.call(document.querySelectorAll('.navbar-toggler'))
+      navbarToggles.map(function(el) { return new bootstrap.Collapse(document.getElementById(el.dataset.bsTarget.substring(1))) })
+    });
+  </script>
+</div>
